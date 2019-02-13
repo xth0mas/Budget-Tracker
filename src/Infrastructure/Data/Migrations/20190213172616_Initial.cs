@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.Data.Migrations
 {
     public partial class Initial : Migration
     {
@@ -14,7 +14,8 @@ namespace Infrastructure.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
-                    Amount = table.Column<decimal>(nullable: false)
+                    Amount = table.Column<decimal>(nullable: false),
+                    Const = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,7 +29,8 @@ namespace Infrastructure.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
-                    Amount = table.Column<decimal>(nullable: false)
+                    Amount = table.Column<decimal>(nullable: false),
+                    Const = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
