@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Infrastructure.Data;
+using Infrastructure.Identity;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Web.Data;
-using Web.Models;
 using Web.Services;
 
 namespace Web
@@ -22,20 +22,20 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<AppIdentityDbContext>()
                 .AddDefaultTokenProviders();
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
-            services.AddDbContext<Infrastructure.Data.AppContext>(
-                options => options.UseSqlServer(
-                    Configuration.GetConnectionString("BudgetTrackerConnection")));
+
+            services.AddDbContext<AppContext>(
+                options => options.UseSqlServer(Configuration.GetConnectionString("AppConnection")));
+
+            services.AddDbContext<AppIdentityDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("IdentityConnection")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
