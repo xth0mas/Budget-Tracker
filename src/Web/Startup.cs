@@ -1,4 +1,5 @@
-﻿using Infrastructure.Data;
+﻿using ApplicationCore.Interfaces;
+using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,7 @@ namespace Web
 {
     public class Startup
     {
+        private IServiceCollection _services;
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -22,11 +24,13 @@ namespace Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppIdentityDbContext>()
-                .AddDefaultTokenProviders();
+            CreateIdentityIfNotCreated(services);
 
-            // Add application services.
+            services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+
+            //rest interfaces and their implementations from core
+
             services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddMvc();
@@ -36,6 +40,24 @@ namespace Web
 
             services.AddDbContext<AppIdentityDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("IdentityConnection")));
+
+            _services = services; //for debug purpose
+        }
+
+        private static void CreateIdentityIfNotCreated(IServiceCollection services)
+        {
+            var sp = services.BuildServiceProvider();
+            using (var scope = sp.CreateScope())
+            {
+                var existingUserManager = scope.ServiceProvider
+                    .GetService<UserManager<ApplicationUser>>();
+                if (existingUserManager == null)
+                {
+                    services.AddIdentity<ApplicationUser, IdentityRole>()
+                        .AddEntityFrameworkStores<AppIdentityDbContext>()
+                        .AddDefaultTokenProviders();
+                }
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +74,7 @@ namespace Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseAuthentication();
